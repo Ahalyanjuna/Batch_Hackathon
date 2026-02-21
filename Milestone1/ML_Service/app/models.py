@@ -6,3 +6,5 @@ class ClassifyInput(BaseModel):
 
 class ClassifyOutput(BaseModel):
     category: str
+    priority: str
+    urgency_score: float

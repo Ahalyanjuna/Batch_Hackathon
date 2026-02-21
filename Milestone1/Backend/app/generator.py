@@ -26,11 +26,9 @@ class TicketGenerator:
             ticket = Ticket(
                 id=str(idx),
                 subject=row["Ticket Subject"],
-                description=row["Ticket Description"],
-                category=row.get("Ticket Type", "General")
+                description=row["Ticket Description"]
             )
 
-            priority = str(row.get("Ticket Priority", "")).lower()
             ticket.urgency_score = detect_urgency(ticket.description)
             tickets.append(ticket)
 

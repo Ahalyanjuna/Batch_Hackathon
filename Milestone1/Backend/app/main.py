@@ -98,27 +98,37 @@ def generate_tickets(count: int):
 # PROCESS HIGHEST PRIORITY TICKET
 # ---------------------------------------------------
 @app.get("/tickets/process")
-async def process_next_ticket():
+async def process_all_tickets():
 
     if ticket_queue.is_empty():
         raise HTTPException(status_code=404, detail="No tickets in queue")
 
-    # pop highest urgency ticket
-    ticket = ticket_queue.pop()
+    processed_tickets = []
 
-    # call ML classifier service
-    category, priority, urgency_score = await call_ml_service(
-        ticket.subject,
-        ticket.description
-    )
+    # Sequentially process based on priority
+    while not ticket_queue.is_empty():
 
-    ticket.category = category
-    ticket.priority = priority
-    ticket.urgency_score = urgency_score
+        # Pop highest priority ticket
+        ticket = ticket_queue.pop()
+
+        # Call ML classification
+        category, priority,_= await call_ml_service(
+            ticket.subject,
+            ticket.description
+        )
+
+        # Update ticket
+        ticket.category = category
+        ticket.priority = priority
+        
+
+        # Store processed ticket
+        processed_tickets.append(ticket)
 
     return {
-        "message": "Ticket processed successfully",
-        "ticket": ticket
+        "message": "All tickets processed sequentially",
+        "processed_count": len(processed_tickets),
+        "tickets": processed_tickets
     }
 
 
