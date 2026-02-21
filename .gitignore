@@ -17,7 +17,6 @@ Thumbs.db
 *.log
 
 # Model artifacts (optional if large)
-*.pkl
 *.pt
 *.h5
 
