@@ -1,5 +1,5 @@
 import heapq
-from models import Ticket
+from app.models import Ticket
 
 class PriorityQueue:
     def __init__(self):
@@ -7,9 +7,7 @@ class PriorityQueue:
         self._counter = 0  # tiebreaker to avoid comparing Ticket objects
 
     def push(self, ticket: Ticket):
-        # Negate urgency_score because heapq is a min-heap
-        # We want highest urgency_score to come out first
-        priority = -ticket.urgency_score
+        priority = -ticket.urgency_score  # higher score first
         heapq.heappush(self._queue, (priority, self._counter, ticket))
         self._counter += 1
 
