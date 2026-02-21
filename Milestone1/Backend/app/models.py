@@ -6,9 +6,9 @@ import time
 
 
 class Category(str, Enum):
-    billing = "Billing"
-    technical = "Technical"
-    legal = "Legal"
+    billing = "Billing inquiry"
+    technical = "Technical issue"
+    legal = "Legal inquiry"
 
 
 class Priority(str, Enum):
