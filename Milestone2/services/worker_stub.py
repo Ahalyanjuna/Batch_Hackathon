@@ -26,7 +26,7 @@ def process_ticket(ticket):
 
     print(f"Processed Ticket {ticket['id']} → category={category}, score={score:.2f}")
 
-    if score > 0.8:
+    if score > 0.7:
         send_alert(ticket, score)
 
 if __name__ == "__main__":

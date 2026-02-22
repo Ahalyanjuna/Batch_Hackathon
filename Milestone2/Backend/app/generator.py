@@ -1,8 +1,8 @@
 import pandas as pd
 import random
 
-from app.models import Ticket
-from app.urgency import detect_urgency
+from Backend.app.models import Ticket
+from Backend.app.urgency import detect_urgency
 
 
 class TicketGenerator:

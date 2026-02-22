@@ -4,7 +4,7 @@ from config import MODE, SLACK_WEBHOOK_URL, DISCORD_WEBHOOK_URL, MOCK_WEBHOOK_UR
 def _send_to_slack(ticket, score):
     payload = {
         "text": (
-            f"🚨 High Urgency Ticket!\n"
+            f"High Urgency Ticket!\n"
             f"ID: {ticket['id']}\n"
             f"Category: {ticket['category']}\n"
             f"Score: {score:.2f}\n"
@@ -13,14 +13,13 @@ def _send_to_slack(ticket, score):
     }
     requests.post(SLACK_WEBHOOK_URL, json=payload, timeout=3)
 
-def _send_to_discord(ticket, score):
+def _send_to_discord(result: dict):
     payload = {
         "content": (
-            f"🚨 **High Urgency Ticket!**\n"
-            f"**ID:** {ticket['id']}\n"
-            f"**Category:** {ticket['category']}\n"
-            f"**Score:** {score:.2f}\n"
-            f"**Message:** {ticket['text']}"
+            f"**High Urgency Ticket!** \n\n"
+            f"**Category:** {result['predicted_category']}\n"
+            f"**Urgency Score:** {result['urgency_score']:.2f}\n"
+            f"**Message:** {result['ticket_text']}"
         )
     }
     requests.post(DISCORD_WEBHOOK_URL, json=payload, timeout=3)
