@@ -8,7 +8,7 @@ from Backend.app.celery_app import celery_app
 
 app = FastAPI(title="Async Intelligent Queue System")
 
-CSV_PATH = "../../Final_customer_support_tickets.csv"
+CSV_PATH = "../Final_customer_support_tickets.csv"
 generator = TicketGenerator(CSV_PATH)
 
 
@@ -23,9 +23,13 @@ def root():
 @app.post("/tickets", status_code=202)
 def create_ticket():
 
-    ticket = generator.generate_random_tickets(1)[0]
+    tickets = generator.generate_random_tickets(10)
 
-    task = process_ticket_task.delay(ticket.model_dump())
+    task_ids = []
+    for ticket in tickets:
+        task = process_ticket_task.delay(ticket.model_dump())
+        task_ids.append(task.id)
+
 
     return JSONResponse(
         status_code=status.HTTP_202_ACCEPTED,

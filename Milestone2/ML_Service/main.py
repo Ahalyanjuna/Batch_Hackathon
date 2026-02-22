@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from app.models import ClassifyInput, ClassifyOutput
-from app.classifier import classify_category
+from Backend.app.models import ClassifyInput, ClassifyOutput
+from ML_Service.classifier import classify_category
 
 app = FastAPI(title="ML Classification Service")
 
