@@ -4,7 +4,7 @@ import torch
 import os
 from transformers import DistilBertTokenizer, DistilBertForSequenceClassification
 
-from app.urgency_model import get_urgency_score
+from ML_Service.app.urgency_model import get_urgency_score
 
 
 # ----------------------------------
@@ -32,7 +32,7 @@ model.eval()
 # 3. Load Label Encoder
 # ----------------------------------
 
-with open(LABEL_ENCODER_PATH, "rb") as f:
+with open(LABEL_PATH, "rb") as f:
     label_encoder = pickle.load(f)
 
 
