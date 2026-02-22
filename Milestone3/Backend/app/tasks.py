@@ -2,7 +2,7 @@ import httpx
 from app.celery_app import celery_app
 from app.services.webhook import send_alert, send_master_incident
 from app.services.deduplicator import check_ticket_storm
-
+from app.services.orchestrator import process_ticket_pipeline
 ML_SERVICE_URL = "http://localhost:8001/classify"
 
 
