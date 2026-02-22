@@ -1,32 +1,25 @@
-import redis
-from Backend.app.celery_app import celery_app
-from ml2_ml_pipeline.inference import predict_ticket
-from services.webhook import _send_to_discord
+import httpx
+from app.celery_app import celery_app
 
-redis_client = redis.Redis(host="localhost", port=6379, db=0)
+ML_SERVICE_URL = "http://localhost:8001/classify"
 
 
-@celery_app.task(bind=True, max_retries=3)
-def process_ticket_task(self, ticket_data: dict):
+@celery_app.task
+def process_ticket_task(ticket: dict):
 
-    lock_key = f"ticket_lock:{ticket_data['id']}"
+    response = httpx.post(
+        ML_SERVICE_URL,
+        json={
+            "subject": ticket["subject"],
+            "description": ticket["description"]
+        }
+    )
 
-    try:
-        with redis_client.lock(lock_key, timeout=30):
+    result = response.json()
 
-            text = f"{ticket_data['subject']} {ticket_data['description']}"
-
-            result = predict_ticket(text)
-
-            if result["urgency_score"] > 0.7:
-                _send_to_discord(result)
-
-            return {
-                "ticket_id": ticket_data["id"],
-                "predicted_category": result["predicted_category"],
-                "urgency_score": result["urgency_score"],
-                "status": "COMPLETED"
-            }
-
-    except Exception as e:
-        raise self.retry(exc=e, countdown=5)
+    return {
+        "id": ticket["id"],
+        "category": result["category"],
+        "priority": result["priority"],
+        "urgency_score": result["urgency_score"]
+    }

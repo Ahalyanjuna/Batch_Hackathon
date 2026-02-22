@@ -1,64 +1,49 @@
-from fastapi import FastAPI, status
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI
 from celery.result import AsyncResult
-import threading
-import time
-from Backend.app.generator import TicketGenerator
-from Backend.app.tasks import process_ticket_task
-from Backend.app.celery_app import celery_app
 
-app = FastAPI(title="Async Intelligent Queue System")
+from app.generator import TicketGenerator
+from app.tasks import process_ticket_task
+from app.celery_app import celery_app
 
-CSV_PATH = "../Final_customer_support_tickets.csv"
-generator = TicketGenerator(CSV_PATH)
+app = FastAPI(title="Async Ticket Routing Engine")
 
-AUTO_BATCH_SIZE = 10        
-AUTO_INTERVAL = 5           
+CSV_PATH = "../../Final_customer_support_tickets.csv"
+
 
 @app.get("/")
 def root():
-    return {"message": "Async Intelligent Ticket Routing Engine Running"}
+    return {"message": "Backend Running"}
 
 
-# ---------------------------------------------------
-# BACKGROUND AUTO GENERATOR THREAD
-# ---------------------------------------------------
-def auto_generate_loop():
-    """
-    Runs forever in background.
-    Generates tickets every few seconds and pushes to Celery.
-    """
-    while True:
-        try:
-            tickets = generator.generate_random_tickets(AUTO_BATCH_SIZE)
+# -----------------------------------------
+# GENERATE + DISPATCH TICKETS
+# -----------------------------------------
+@app.post("/tickets/generate/{count}")
+def generate_tickets(count: int):
 
-            print(f"\n Generating {len(tickets)} tickets...")
+    generator = TicketGenerator(CSV_PATH)
+    tickets = generator.generate_random_tickets(count)
 
-            for ticket in tickets:
-                process_ticket_task.delay(ticket.model_dump())
+    task_ids = []
 
-        except Exception as e:
-            print(" Generator Error:", e)
+    for ticket in tickets:
+        task = process_ticket_task.delay(ticket.model_dump())
+        task_ids.append(task.id)
 
-        time.sleep(AUTO_INTERVAL)
+    return {
+        "message": f"{count} tickets sent for processing",
+        "task_ids": task_ids
+    }
 
 
-# ---------------------------------------------------
-# START BACKGROUND THREAD WHEN APP STARTS
-# ---------------------------------------------------
-@app.on_event("startup")
-def start_background_generator():
-    thread = threading.Thread(target=auto_generate_loop, daemon=True)
-    thread.start()
-    print("Auto Ticket Generator Started")
-
-
-# ---------------------------------------------------
-# CHECK TASK STATUS (Optional debugging)
-# ---------------------------------------------------
+# -----------------------------------------
+# CHECK TASK STATUS
+# -----------------------------------------
 @app.get("/tasks/{task_id}")
 def get_task_status(task_id: str):
+
     result = AsyncResult(task_id, app=celery_app)
+
     return {
         "task_id": task_id,
         "status": result.status,
