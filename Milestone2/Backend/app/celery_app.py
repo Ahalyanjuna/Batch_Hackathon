@@ -6,6 +6,5 @@ celery_app = Celery(
     backend="redis://localhost:6379/0"
 )
 
-celery_app.conf.task_routes = {
-    "app.tasks.process_ticket_task": {"queue": "tickets"}
-}
+# tell celery where tasks are
+celery_app.autodiscover_tasks(["app"])

@@ -1,5 +1,5 @@
 import requests
-from config import MODE, SLACK_WEBHOOK_URL, DISCORD_WEBHOOK_URL, MOCK_WEBHOOK_URL
+from app.config import MODE, SLACK_WEBHOOK_URL, DISCORD_WEBHOOK_URL, MOCK_WEBHOOK_URL
 
 def _send_to_slack(ticket, score):
     payload = {
@@ -13,13 +13,13 @@ def _send_to_slack(ticket, score):
     }
     requests.post(SLACK_WEBHOOK_URL, json=payload, timeout=3)
 
-def _send_to_discord(result: dict):
+def _send_to_discord(ticket, score):
     payload = {
         "content": (
-            f"**High Urgency Ticket!** \n\n"
-            f"**Category:** {result['predicted_category']}\n"
-            f"**Urgency Score:** {result['urgency_score']:.2f}\n"
-            f"**Message:** {result['ticket_text']}"
+            f"🚨 **High Urgency Ticket!**\n\n"
+            f"**Category:** {ticket['category']}\n"
+            f"**Urgency Score:** {score:.2f}\n"
+            f"**Message:** {ticket.get('description', ticket.get('text', 'N/A'))}"
         )
     }
     requests.post(DISCORD_WEBHOOK_URL, json=payload, timeout=3)
